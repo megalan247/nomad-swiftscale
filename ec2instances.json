@@ -1,0 +1,92 @@
+[
+    {
+        "type": "t3a.nano",
+        "memory_mb": 112,
+        "num_cpus": 2,
+        "hourly_price": 0.0056
+    },
+    {
+        "type": "t3a.micro",
+        "memory_mb": 624,
+        "num_cpus": 2,
+        "hourly_price": 0.0112
+    },
+    {
+        "type": "t3a.small",
+        "memory_mb": 1648,
+        "num_cpus": 2,
+        "hourly_price": 0.0219
+    },
+    {
+        "type": "t3a.medium",
+        "memory_mb": 3696,
+        "num_cpus": 2,
+        "hourly_price": 0.0434
+    },
+    {
+        "type": "t3a.large",
+        "memory_mb": 7792,
+        "num_cpus": 2,
+        "hourly_price": 0.0864
+    },
+    {
+        "type": "t3a.xlarge",
+        "memory_mb": 15984,
+        "num_cpus": 4,
+        "hourly_price": 0.1728
+    },
+    {
+        "type": "t3a.2xlarge",
+        "memory_mb": 32368,
+        "num_cpus": 8,
+        "hourly_price": 0.3456
+    },
+    {
+        "type": "c5a.large",
+        "memory_mb": 3696,
+        "num_cpus": 2,
+        "hourly_price": 0.087
+    },
+    {
+        "type": "c5a.xlarge",
+        "memory_mb": 7792,
+        "num_cpus": 4,
+        "hourly_price": 0.174
+    },
+    {
+        "type": "c5a.2xlarge",
+        "memory_mb": 15984,
+        "num_cpus": 8,
+        "hourly_price": 0.348
+    },
+    {
+        "type": "c5a.4xlarge",
+        "memory_mb": 32368,
+        "num_cpus": 16,
+        "hourly_price": 0.696
+    },
+    {
+        "type": "c5a.8xlarge",
+        "memory_mb": 61536,
+        "num_cpus": 32,
+        "hourly_price": 1.392
+    },
+    {
+        "type": "c5a.12xlarge",
+        "memory_mb": 94304,
+        "num_cpus": 48,
+        "hourly_price": 2.088
+    },
+    {
+        "type": "c5a.16xlarge",
+        "memory_mb": 127072,
+        "num_cpus": 64,
+        "hourly_price": 2.784
+    },
+    {
+        "type": "c5a.24xlarge",
+        "memory_mb": 192608,
+        "num_cpus": 96,
+        "hourly_price": 4.176
+    }
+]
