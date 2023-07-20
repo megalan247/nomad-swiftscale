@@ -74,17 +74,6 @@ When running in AWS, the required permissions are quite broad, owing to the func
 
 If you assign an IAM role as part of the AWS Autoscaling group you want to scale with Swiftscale, you will also need to allow the autoscaler to `PassRole` the appropriate IAM role, in order to create new Autoscaling groups.
 
-<!-- USAGE EXAMPLES -->
-## Usage
-
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 <!-- ROADMAP -->
 ## Roadmap
 
