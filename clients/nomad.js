@@ -490,7 +490,7 @@ async function getBlockedResourceRequirements() {
             continue
         }
         var allocs = Object.keys(evaluation.FailedTGAllocs)
-
+        var allBlockedAllocResources = []
         for (var allocName of allocs) {
             let alloc = evaluation.FailedTGAllocs[allocName]
             let allocDatacenter = Object.keys(alloc.NodesAvailable)[0]
@@ -509,7 +509,7 @@ async function getBlockedResourceRequirements() {
                 }
                 let numAllocs = await getNumberOfQueuedAllocsByJobAndAllocName(evaluation.JobID, allocName)
                 let resources = await getTotalResourceOfAllocInJob(evaluation.JobID, allocName)
-
+                
                 var perAllocResourceMemory = resources.allocMemLimit
                 var perAllocResourceCPU = resources.allocCpuLimit
                 if (perAllocResourceMemory > maxBlockedMemory) {
@@ -521,6 +521,13 @@ async function getBlockedResourceRequirements() {
                 }
                 totalBlockedMemory += resources.allocMemLimit * numAllocs
                 totalBlockedCPU += resources.allocCpuLimit * numAllocs
+
+                for(let i = 0; i < numAllocs; i++) {
+                    allBlockedAllocResources.push({
+                        mem: perAllocResourceMemory,
+                        cpu: perAllocResourceCPU
+                    }); 
+                }
             }
 
         }
@@ -532,7 +539,8 @@ async function getBlockedResourceRequirements() {
         totalBlockedMemory,
         totalBlockedCPU,
         maxBlockedMemory,
-        maxBlockedCPU
+        maxBlockedCPU,
+        allBlockedAllocResources
     }
 }
 

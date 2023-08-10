@@ -62,9 +62,7 @@ async function main() {
     if (blockedResourceRequirements.totalBlockedMemory || blockedResourceRequirements.totalBlockedCPU) {
         log.info("Scaleup based on blocked evals")
         log.info(`Need to scale up ${JSON.stringify(blockedResourceRequirements)}`)
-        let scaleUpCPU = blockedResourceRequirements.totalBlockedCPU / 2000; // This magic number is roughly the CPU frequency in Mhz, and is roughly equivilent to how Nomad calculates CPUShares from num CPUs
-        let scaleUpCPUMax = blockedResourceRequirements.maxBlockedCPU / 2000
-        var scaleUpInstances = aws.getLeastExpensiveCombination(blockedResourceRequirements.totalBlockedMemory, scaleUpCPU, blockedResourceRequirements.maxBlockedMemory, scaleUpCPUMax)
+        var scaleUpInstances = aws.getLeastExpensiveCombination(blockedResourceRequirements.allBlockedAllocResources)
         log.info(`Found least expensive option of ${JSON.stringify(scaleUpInstances)}`)
         for (var instance of scaleUpInstances) {
             let groupName = "nm-auto-" + crypto.randomBytes(4).toString("hex")

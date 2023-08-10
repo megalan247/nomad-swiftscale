@@ -78,7 +78,7 @@ If you assign an IAM role as part of the AWS Autoscaling group you want to scale
 - [ ] Create Reconciliation function, to periodically change all instance types int he cluster to be more efficient
 - [ ] Add metrics for monitoring
 - [ ] Refactor some elements to be more efficient 
-    - [ ] getLeastExpensiveCombination
+    - [ x ] getLeastExpensiveCombination
     - [ ] getBlockedResourceRequirements
 
 See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).

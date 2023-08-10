@@ -199,36 +199,56 @@ async function terminateInstance(instanceId) {
 }
 
 
-function getLeastExpensiveCombination(scaleUpMemory, scaleUpCpu, minMemory, minCpu) {
-  const validTypes = instanceTypes.filter((instance) => instance.memory_mb >= minMemory && instance.num_cpus >= minCpu);
+function getLeastExpensiveCombination(jobs) {
 
-  const findCombination = (remainingScaleUpMemory, remainingScaleUpCpu, currentTypes) => {
-    if (remainingScaleUpMemory <= 0 && remainingScaleUpCpu <= 0) {
-      return currentTypes;
+    let instances = instanceTypes
+    // Convert job CPU to num_cpus
+    jobs = jobs.map(job => ({ cpu: job.cpu / 2000, mem: job.mem }));
+  
+    // Sort instances by hourly price in ascending order, then by memory_mb in descending order
+    instances.sort((a, b) => a.hourly_price - b.hourly_price || b.memory_mb - a.memory_mb);
+  
+    let totalCost = 0;
+    let activeInstances = [];
+
+    for (let job of jobs) {
+        let placed = false;
+
+        // Try to place the job on an active instance
+        for(let i = 0; i < activeInstances.length; i++) {
+            let instance = activeInstances[i];
+            if(job.cpu <= instance.remainingCpu && job.mem <= instance.remainingMem) {
+                instance.remainingCpu -= job.cpu;
+                instance.remainingMem -= job.mem;
+                placed = true;
+                break;
+            }
+        }
+
+        // If not placed, select a new instance
+        if(!placed) {
+            for(let instance of instances) {
+                if(job.cpu <= instance.num_cpus && job.mem <= instance.memory_mb) {
+                    activeInstances.push({ 
+                        type: instance.type, 
+                        hourlyPrice: instance.hourly_price, 
+                        remainingCpu: instance.num_cpus - job.cpu, 
+                        remainingMem: instance.memory_mb - job.mem 
+                    });
+                    totalCost += instance.hourly_price;
+                    placed = true;
+                    break;
+                }
+            }
+        }
+
+        if(!placed) {
+            console.log(`Cannot place job with cpu: ${job.cpu}, mem: ${job.mem}`);
+        }
     }
-
-    let bestCombination = null;
-    let lowestCost = Infinity;
-
-    for (const instanceType of validTypes) {
-      const newTypes = [...currentTypes, instanceType];
-      const newScaleUpMemory = remainingScaleUpMemory - instanceType.memory_mb;
-      const newScaleUpCpu = remainingScaleUpCpu - instanceType.num_cpus;
-      const combination = findCombination(newScaleUpMemory, newScaleUpCpu, newTypes);
-
-      const cost = combination.reduce((total, instance) => total + instance.hourly_price, 0);
-
-      if (cost < lowestCost) {
-        bestCombination = combination;
-        lowestCost = cost;
-      }
-    }
-
-    return bestCombination;
-  };
-
-  return findCombination(scaleUpMemory, scaleUpCpu, []);
-};
+  
+    return { allocations: activeInstances.map(i => ({ instanceType: i.type, hourlyPrice: i.hourlyPrice })), totalCost };
+}
 
 async function refreshManagedAutoScalingGroups() {
   log.debug(`Checking if there are any managed ASGs with new launch template version to update`)
