@@ -2,6 +2,9 @@
 <a name="readme-top"></a>
 
 <div align="center">
+<a href="https://github.com/rorylshanks/nomad-swiftscale">
+    <img src="https://raw.githubusercontent.com/rorylshanks/nomad-swiftscale/main/docs/swiftscale.png" alt="Logo" width="350" height="160">
+</a>
 
 <h3 align="center">Nomad Swiftscale</h3>
 
