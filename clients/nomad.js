@@ -327,7 +327,7 @@ function getAllocResourceUsage(allocation) {
     let allocationCPU = 0;
     let allocatedResources = allocation.AllocatedResources.Tasks
     for (const task of Object.keys(allocatedResources)) {
-        if (allocation.TaskStates[task]) {
+        if (allocation?.TaskStates[task]) {
             // If task is running, add resources to the alloc usage
             if (allocation.TaskStates[task].State == "running") {
                 allocationMemory += allocatedResources[task].Memory.MemoryMB;
