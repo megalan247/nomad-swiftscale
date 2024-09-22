@@ -44,6 +44,8 @@ let scaleDownStep = 1
 
 let scalingActionCompleted = false
 
+console.log(`Setting log level to ${process.env.LOG_LEVEL || "debug"}`)
+
 log.setLevel(process.env.LOG_LEVEL || "debug")
 
 async function main() {

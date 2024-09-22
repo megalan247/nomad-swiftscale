@@ -11,7 +11,7 @@ const wait = promisify(setTimeout);
 
 let nomadAddr = process.env.NOMAD_ADDR
 let nomadToken = process.env.NOMAD_TOKEN
-let nomadDatacenter = process.env.NOMAD_TOKEN
+let nomadDatacenter = process.env.NOMAD_DATACENTER
 let basicAuthUsername = process.env.NOMAD_AUTH_USERNAME
 let basicAuthPassword = process.env.NOMAD_AUTH_PASSWORD
 let mtlsCertPath = process.env.NOMAD_CLIENT_CERT
@@ -231,11 +231,12 @@ async function getTotalNodeMemoryAndCPU() {
         totalMemory += node.NodeResources.Memory.MemoryMB;
         totalCPU += node.NodeResources.Cpu.CpuShares;
     }
-
-    return {
+    var returnObj = {
         totalMemory,
         totalCPU
-    };
+    }
+    log.debug(`Discovered totals getTotalNodeMemoryAndCPU(): ${JSON.stringify(returnObj)}`)
+    return returnObj;
 }
 
 async function getSortedNodesByAllocsAndPrio() {
@@ -327,7 +328,8 @@ function getAllocResourceUsage(allocation) {
     let allocationCPU = 0;
     let allocatedResources = allocation.AllocatedResources.Tasks
     for (const task of Object.keys(allocatedResources)) {
-        if (allocation?.TaskStates[task]) {
+        if (allocation?.TaskStates) {
+            if (allocation?.TaskStates[task]) {
             // If task is running, add resources to the alloc usage
             if (allocation.TaskStates[task].State == "running") {
                 allocationMemory += allocatedResources[task].Memory.MemoryMB;
@@ -337,6 +339,7 @@ function getAllocResourceUsage(allocation) {
                 // If the task is pending, but the alloc wants to run, add the resources too
                 allocationMemory += allocatedResources[task].Memory.MemoryMB;
                 allocationCPU += allocatedResources[task].Cpu.CpuShares;
+            }
             }
         }
 
@@ -387,13 +390,14 @@ async function getTotalMemoryAndCPUUsage(nodeName) {
         totalMemory += allocationMemory;
         totalCPU += allocationCPU;
     }
-
-    return {
+    var returnObj = {
         totalMemory,
         totalCPU,
         maxMemoryAllocation,
         maxCPUAllocation
-    };
+    }
+    log.debug(`Discovered totals getTotalMemoryAndCPUUsage(${nodeName}): ${JSON.stringify(returnObj)}`)
+    return returnObj;
 }
 
 async function getDatacenterUtilization() {

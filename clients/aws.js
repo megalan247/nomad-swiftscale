@@ -200,35 +200,34 @@ async function terminateInstance(instanceId) {
 
 
 function getLeastExpensiveCombination(scaleUpMemory, scaleUpCpu, minMemory, minCpu) {
-  const validTypes = instanceTypes.filter((instance) => instance.memory_mb >= minMemory && instance.num_cpus >= minCpu);
+  const alpha = scaleUpMemory / scaleUpCpu; // Weighting factor
+  const validTypes = instanceTypes.filter(
+    (instance) => instance.memory_mb >= minMemory && instance.num_cpus >= minCpu
+  );
 
-  const findCombination = (remainingScaleUpMemory, remainingScaleUpCpu, currentTypes) => {
-    if (remainingScaleUpMemory <= 0 && remainingScaleUpCpu <= 0) {
-      return currentTypes;
+  validTypes.sort((a, b) => {
+    const costEfficiencyA = a.hourly_price / (a.memory_mb + alpha * a.num_cpus);
+    const costEfficiencyB = b.hourly_price / (b.memory_mb + alpha * b.num_cpus);
+    return costEfficiencyA - costEfficiencyB;
+  });
+
+  let remainingMemory = scaleUpMemory;
+  let remainingCpu = scaleUpCpu;
+  const combination = [];
+
+  for (const instance of validTypes) {
+    while (remainingMemory > 0 || remainingCpu > 0) {
+      combination.push(instance);
+      remainingMemory -= instance.memory_mb;
+      remainingCpu -= instance.num_cpus;
     }
-
-    let bestCombination = null;
-    let lowestCost = Infinity;
-
-    for (const instanceType of validTypes) {
-      const newTypes = [...currentTypes, instanceType];
-      const newScaleUpMemory = remainingScaleUpMemory - instanceType.memory_mb;
-      const newScaleUpCpu = remainingScaleUpCpu - instanceType.num_cpus;
-      const combination = findCombination(newScaleUpMemory, newScaleUpCpu, newTypes);
-
-      const cost = combination.reduce((total, instance) => total + instance.hourly_price, 0);
-
-      if (cost < lowestCost) {
-        bestCombination = combination;
-        lowestCost = cost;
-      }
+    if (remainingMemory <= 0 && remainingCpu <= 0) {
+      break;
     }
+  }
 
-    return bestCombination;
-  };
-
-  return findCombination(scaleUpMemory, scaleUpCpu, []);
-};
+  return combination;
+}
 
 async function refreshManagedAutoScalingGroups() {
   log.debug(`Checking if there are any managed ASGs with new launch template version to update`)
