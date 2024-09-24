@@ -200,15 +200,24 @@ async function terminateInstance(instanceId) {
 
 
 function getLeastExpensiveCombination(scaleUpMemory, scaleUpCpu, minMemory, minCpu) {
-  const alpha = scaleUpMemory / scaleUpCpu; // Weighting factor
+  // Calculate the weighting factor for balancing memory and CPU
+  const alpha = scaleUpMemory / scaleUpCpu;
+
+  // Filter instances that meet the minimum requirements
   const validTypes = instanceTypes.filter(
-    (instance) => instance.memory_mb >= minMemory && instance.num_cpus >= minCpu
+    (instance) => (instance.memory_mb - 350) >= minMemory && instance.num_cpus >= minCpu
   );
 
+  // Sort instances based on the adjusted metric to prefer larger instances
   validTypes.sort((a, b) => {
-    const costEfficiencyA = a.hourly_price / (a.memory_mb + alpha * a.num_cpus);
-    const costEfficiencyB = b.hourly_price / (b.memory_mb + alpha * b.num_cpus);
-    return costEfficiencyA - costEfficiencyB;
+    const totalResourceA = a.memory_mb + alpha * a.num_cpus;
+    const totalResourceB = b.memory_mb + alpha * b.num_cpus;
+
+    const adjustedMetricA = totalResourceA / a.hourly_price;
+    const adjustedMetricB = totalResourceB / b.hourly_price;
+
+    // Sort in descending order to prefer larger instances
+    return adjustedMetricB - adjustedMetricA;
   });
 
   let remainingMemory = scaleUpMemory;
@@ -216,11 +225,24 @@ function getLeastExpensiveCombination(scaleUpMemory, scaleUpCpu, minMemory, minC
   const combination = [];
 
   for (const instance of validTypes) {
-    while (remainingMemory > 0 || remainingCpu > 0) {
+    // Determine how many of this instance type are needed
+    const instancesNeededMemory = Math.ceil(remainingMemory / instance.memory_mb);
+    const instancesNeededCpu = Math.ceil(remainingCpu / instance.num_cpus);
+    const instancesNeeded = Math.max(instancesNeededMemory, instancesNeededCpu);
+
+    // Add the required number of instances to the combination
+    for (let i = 0; i < instancesNeeded; i++) {
       combination.push(instance);
       remainingMemory -= instance.memory_mb;
       remainingCpu -= instance.num_cpus;
+
+      // Break if we've met the requirements
+      if (remainingMemory <= 0 && remainingCpu <= 0) {
+        break;
+      }
     }
+
+    // Break out of the loop if requirements are met
     if (remainingMemory <= 0 && remainingCpu <= 0) {
       break;
     }
@@ -228,6 +250,7 @@ function getLeastExpensiveCombination(scaleUpMemory, scaleUpCpu, minMemory, minC
 
   return combination;
 }
+
 
 async function refreshManagedAutoScalingGroups() {
   log.debug(`Checking if there are any managed ASGs with new launch template version to update`)
