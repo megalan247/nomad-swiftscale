@@ -493,7 +493,7 @@ async function getBlockedResourceRequirements() {
         if (evaluation.Status != "blocked") {
             continue
         }
-        var allocs = Object.keys(evaluation.FailedTGAllocs)
+        var allocs = Object.keys(evaluation.FailedTGAllocs || {})
 
         for (var allocName of allocs) {
             let alloc = evaluation.FailedTGAllocs[allocName]
